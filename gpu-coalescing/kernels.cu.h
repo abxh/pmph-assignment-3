@@ -95,6 +95,15 @@ naiveKernel(ElTp* A, ElTp* B, uint32_t num_rows, uint32_t num_cols) {
 template<class ElTp>
 __global__ void 
 transKernel(ElTp* A_tr, ElTp* B_tr, uint32_t num_rows, uint32_t num_cols) {
+    uint32_t gid = blockIdx.x * blockDim.x + threadIdx.x;
+    if(gid >= num_rows) return;
+
+    ElTp accum = 0;
+    for(int j=0; j<num_cols; j++) {
+        ElTp el_a  = A_tr[ j*num_rows + gid ];
+        accum = sqrt(accum) + el_a * el_a;
+        B_tr[ j*num_rows + gid ] = accum;
+    }
 }
 
 ///////////////////////////////////
@@ -143,7 +152,7 @@ optimKernel(ElTp* A, ElTp* B, uint32_t num_rows, uint32_t num_cols) { //unsigned
         }
         __syncthreads();
 
-        if(gid < num_rows)
+        if(gid < num_rows) {
         for(int j=jj; j<count_j; j++) {
             // look at shared memory as a "[blockDim.x][CHUNK]ElTp" array
             // each thread copies its CHUNK consecutive elements from
@@ -153,7 +162,7 @@ optimKernel(ElTp* A, ElTp* B, uint32_t num_rows, uint32_t num_cols) { //unsigned
             ElTp tmpA = sh_mem[loc_ind];
             accum = sqrt(accum) + tmpA*tmpA;
             sh_mem[loc_ind] = accum;
-        }
+        } }
         __syncthreads();
 
         // look at shared memory as a "[CHUNK][blockDim.x]ElTp" array
