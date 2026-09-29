@@ -7,13 +7,17 @@
 #include <sys/time.h>
 #include <time.h>
 
-#if 0
-typedef int        int32_t;
-typedef long long  int64_t;
-#endif
+// #if 0
+// typedef int        int32_t;
+// typedef long long  int64_t;
+// #endif
+//
+// typedef unsigned int uint32_t;
+// typedef unsigned long long uint64_t;
 
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
+// modification: use <stdint.h> and PRIu64 format specifier from <inttypes.h> instead:
+#include <stdint.h>
+#include <inttypes.h>
 
 #define min(a,b) ( ((a)<(b))? (a) : (b) )
 
@@ -93,7 +97,7 @@ bool validate(T* A, T* B, const uint64_t sizeAB, const T ERR){
     for(uint64_t i = 0; i < sizeAB; i++) {
         T curr_err = fabs( (A[i] - B[i]) / fmax(A[i], B[i]) ); 
         if (curr_err >= ERR) {
-            printf("INVALID RESULT at flat index %llu: %f vs %f\n", i, A[i], B[i]);
+            printf("INVALID RESULT at flat index %" PRIu64 ": %f vs %f\n", i, A[i], B[i]);
             return false;
         }
     }
@@ -105,7 +109,7 @@ template<class T>
 bool validateExact(T* A, T* B, uint64_t sizeAB){
     for(uint64_t i = 0; i < sizeAB; i++) {
         if ( A[i] != B[i] ) {
-            printf("INVALID RESULT at flat index %llu: %f vs %f\n", i, (float)A[i], (float)B[i]);
+            printf("INVALID RESULT at flat index %" PRIu64 ": %f vs %f\n", i, (float)A[i], (float)B[i]);
             return false;
         }
     }

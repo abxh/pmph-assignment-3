@@ -1,3 +1,4 @@
+
 #include "../helper.h"
 #include "goldenSeq.h"
 #include "kernels.cu.h"
@@ -41,8 +42,11 @@ void multiStepHisto ( uint32_t* d_inp_inds
      * but is essentially equivalent with the naive kernel (hence
      * it has roughly the same performance).
      ****************************************************************/
-    {
-        multiStepKernel<<<grid,B>>>(d_inp_inds, d_inp_vals, d_hist, N, 0, H);
+    for(uint32_t k=0; k<num_partitions; k++) {
+        uint32_t low_bound = k*CHUNK;
+        uint32_t upp_bound = min( (k+1)*CHUNK, H );
+
+        multiStepKernel<<<grid,B>>>(d_inp_inds, d_inp_vals, d_hist, N, low_bound, upp_bound);
     }
 }
 

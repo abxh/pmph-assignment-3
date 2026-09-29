@@ -1,0 +1,33 @@
+If:
+  PathMatch: .*\.c
+
+CompileFlags:
+  Add: 
+    - -xc++
+    - -xcuda
+
+---
+
+If:
+  PathMatch: .*\.h
+
+CompileFlags:
+  Add:
+    - -xc++
+    - -xcuda
+
+---
+
+If:
+  PathMatch: .*\.cuh
+
+CompileFlags:
+  Add: -xcuda
+
+---
+
+If:
+  PathMatch: .*\.cu.h
+
+CompileFlags:
+  Add: -xcuda
