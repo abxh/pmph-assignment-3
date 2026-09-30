@@ -148,11 +148,12 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
 
       // Please implement Task 3.1.2 here
+      #pragma unroll
       for(int j=0; j<Rx; j++) {
-        const int Bx = jjj + threadIdx.x*Rx + j;
         const int By = kk + threadIdx.y;
+        const int Bx = jjj + threadIdx.x*Rx + j;
         ElTp Bout = (By < heightB && Bx < widthB) ? B[By * widthB + Bx] : 0;
-        Bloc[threadIdx.y][threadIdx.x] = Bout;
+        Bloc[threadIdx.x][threadIdx.y] = Bout;
       }
 
       __syncthreads();
@@ -176,7 +177,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
                 #if 1
                   css[i][j] +=
                     Aloc[threadIdx.y*Ry + i][k] *
-                    Bloc[k][threadIdx.x*Rx + j];
+                    Bloc[threadIdx.x*Rx + j][k];
                 #else
                   if( (iii + threadIdx.y*Ry + i < heightA) &&
                       (kk+k < widthA) &&
