@@ -117,7 +117,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
          const int Ay = iii + Ry * threadIdx.y + i;
          const int Ax = kk + threadIdx.x;
          ElTp Aout = (Ay < heightA && Ax < widthA) ? A[Ay * widthA + Ax] : 0;
-         Aloc[threadIdx.y][threadIdx.x] = Aout;
+         Aloc[threadIdx.y*Ry + i][threadIdx.x] = Aout;
        }
 
       /***************************************
@@ -153,7 +153,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
         const int By = kk + threadIdx.y;
         const int Bx = jjj + threadIdx.x*Rx + j;
         ElTp Bout = (By < heightB && Bx < widthB) ? B[By * widthB + Bx] : 0;
-        Bloc[threadIdx.x][threadIdx.y] = Bout;
+        Bloc[threadIdx.y][threadIdx.x*Rx + j] = Bout;
       }
 
       __syncthreads();
@@ -177,7 +177,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
                 #if 1
                   css[i][j] +=
                     Aloc[threadIdx.y*Ry + i][k] *
-                    Bloc[threadIdx.x*Rx + j][k];
+                    Bloc[k][threadIdx.x*Rx + j];
                 #else
                   if( (iii + threadIdx.y*Ry + i < heightA) &&
                       (kk+k < widthA) &&
