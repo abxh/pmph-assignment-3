@@ -113,8 +113,8 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
       
        // Please implement Task 3.1.1 here
-       {
-         const int Ay = iii + threadIdx.y;
+       for(int i=0; i<Ry; i++) {
+         const int Ay = iii + Ry * threadIdx.y + i;
          const int Ax = kk + threadIdx.x;
          ElTp Aout = (Ay < heightA && Ax < widthA) ? A[Ay * widthA + Ax] : 0;
          Aloc[threadIdx.y][threadIdx.x] = Aout;
@@ -148,8 +148,8 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
 
       // Please implement Task 3.1.2 here
-      {
-        const int Bx = jjj + threadIdx.x;
+      for(int j=0; j<Rx; j++) {
+        const int Bx = jjj + threadIdx.x*Rx + j;
         const int By = kk + threadIdx.y;
         ElTp Bout = (By < heightB && Bx < widthB) ? B[By * widthB + Bx] : 0;
         Bloc[threadIdx.y][threadIdx.x] = Bout;
