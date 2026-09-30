@@ -113,6 +113,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
       
        // Please implement Task 3.1.1 here
+       #pragma unroll
        for(int i=0; i<Ry; i++) {
          const int Ay = iii + Ry * threadIdx.y + i;
          const int Ax = kk + threadIdx.x;
