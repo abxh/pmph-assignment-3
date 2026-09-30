@@ -32,6 +32,21 @@ __global__ void mmmNaiveKer(ElTp* A, ElTp* B, ElTp* C, int heightA, int widthB, 
 template <class ElTp, int Ty, int Ry, int Tx, int Rx, int Tk>
 __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, int widthB, int widthA) {
 
+  // Ty = blockDim.y
+  // Tx = blockDim.x
+
+  //    (Ty*Ry x Tk) * (Tk x Tx*Rx)
+  // == (blockDim.y*Ry x Tk) * (Tk x blockDim.x*Rx)
+  // == (blockDim.y*Ry) x (blockDim.x*Rx)
+
+  // css : Ry x Rx (block size y x block size x)
+
+  // heightA = Ty*Ry
+  // widthA = heightB = Tk
+  // widthB = Tx*Rx
+
+  const int heightB = widthA;
+
   // remapping (a slice of) A to shared memory
   __shared__ ElTp Aloc[Ty*Ry][Tk];
 
@@ -98,6 +113,12 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
       
        // Please implement Task 3.1.1 here
+       {
+         const int Ay = iii + threadIdx.y;
+         const int Ax = kk + threadIdx.x;
+         ElTp Aout = (Ay < heightA && Ax < widthA) ? A[Ay * widthA + Ax] : 0;
+         Aloc[threadIdx.y][threadIdx.x] = Aout;
+       }
 
       /***************************************
        * Subtask 3.1.2:
@@ -127,6 +148,12 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
        **************************************************************/
 
       // Please implement Task 3.1.2 here
+      {
+        const int Bx = jjj + threadIdx.x;
+        const int By = kk + threadIdx.y;
+        ElTp Bout = (By < heightB && Bx < widthB) ? B[By * widthB + Bx] : 0;
+        Bloc[threadIdx.y][threadIdx.x] = Bout;
+      }
 
       __syncthreads();
 
@@ -146,6 +173,11 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
                  * This assumes of course that you have 
                  *   already solved Task 3.1.
                  ***************************************/
+                #if 1
+                  css[i][j] +=
+                    Aloc[threadIdx.y*Ry + i][k] *
+                    Bloc[k][threadIdx.x*Rx + j];
+                #else
                   if( (iii + threadIdx.y*Ry + i < heightA) &&
                       (kk+k < widthA) &&
                       (jjj + threadIdx.x*Rx + j < widthB)
@@ -153,6 +185,7 @@ __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, in
                   css[i][j] +=  
                     A[ (iii + threadIdx.y*Ry + i)*widthA + (kk + k)] *
                     B[ (kk+k)*widthB + jjj + threadIdx.x*Rx + j] ;
+                #endif
               }
           }
       }

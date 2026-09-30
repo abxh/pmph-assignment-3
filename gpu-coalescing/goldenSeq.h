@@ -7,7 +7,6 @@
  * Result:
  *   B : [num_rows][num_cols]ElTp
  */
-#include <atomic>
 template<class ElTp>
 void goldenSeq(ElTp* A, ElTp* B, const uint32_t num_rows, const uint32_t num_cols) {
     /**************************************************/
@@ -18,9 +17,9 @@ void goldenSeq(ElTp* A, ElTp* B, const uint32_t num_rows, const uint32_t num_col
     /***   - and if neccessary by a very tiny bit   ***/
     /***     of code changes                        ***/
     /**************************************************/
-    std::atomic<ElTp> accum, a_el;
+    ElTp accum, a_el;
     
-    #pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static) private(accum, a_el)
     for(uint64_t i = 0; i < num_rows; i++) {
         uint64_t ii = i*num_cols;
         accum = 0.0;
