@@ -77,7 +77,7 @@ template <class ElTp, int T> __global__
 void bmmmTiledKer ( ElTp* A,      ElTp* B, char* X_tr,   ElTp* Y
                   , const int M,  const int K, const int N
 ) {
-  __shared__ ElTp Xsh_tr[T];
+  __shared__ char Xsh_tr[T];
   ElTp acc[T];
 
   const int ii  = blockIdx.x * T;
@@ -104,8 +104,10 @@ void bmmmTiledKer ( ElTp* A,      ElTp* B, char* X_tr,   ElTp* Y
 
     int i = ii + tid;
 
-    char x = (tid < T && i < M) ? X_tr[q*M + i] : 0;
-    Xsh_tr[tid] = x;
+    if (tid < T) {
+      char x = (i < M) ? X_tr[q*M + i] : 0;
+      Xsh_tr[tid] = x;
+    }
 
     #pragma unroll
     for (int t=0; t<T; t++) {
