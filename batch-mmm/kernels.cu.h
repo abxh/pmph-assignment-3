@@ -83,7 +83,7 @@ void bmmmTiledKer ( ElTp* A,      ElTp* B, char* X_tr,   ElTp* Y
   const int ii  = blockIdx.x * T;
   const int j1  = threadIdx.y;
   const int j2  = threadIdx.x;
-  const int flat_thid = threadIdx.y * K + threadIdx.x;
+  const int tid = threadIdx.y * K + threadIdx.x;
 
   #pragma unroll
   for(int t=0; t<T; t++)
@@ -99,5 +99,24 @@ void bmmmTiledKer ( ElTp* A,      ElTp* B, char* X_tr,   ElTp* Y
    * hold in global memory, i.e., A, B, X_tr, Y.
    ***********************************************/
 
+  for (int q=0; q<N; q++) {
+    float ab = A[j1*N + q] * B[q*K + j2];
+
+    int i = ii + tid;
+
+    char x = (tid < T && i < M) ? X_tr[q*M + i] : 0;
+    Xsh_tr[tid] = x;
+
+    #pragma unroll
+    for (int t=0; t<T; t++) {
+      float v = (Xsh_tr[t] != 0) ? 1 : 0;
+      acc[t] += ab * v;
+    }
+  }
+  for (int t=0; t<T; t++) {
+      if (ii + t < M) {
+        Y[(ii + t)*K*K + j1*K + j2] = acc[t];
+      }
+  }
 }
 #endif
