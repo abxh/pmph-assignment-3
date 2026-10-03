@@ -104,19 +104,15 @@ void bmmmTiledKer ( ElTp* A,      ElTp* B, char* X_tr,   ElTp* Y
 
     int i = ii + tid;
     char x = (tid < T && i < M) ? X_tr[q*M + i] : 0;
-    if (tid < T) {
-      Xsh_tr[tid] = x;
-    }
+    Xsh_tr[tid] = x;
     
-    __syncthreads();
-
+    __syncthreads(); // barrier
     #pragma unroll
     for (int t=0; t<T; t++) {
       float v = (Xsh_tr[t] != 0) ? 1 : 0;
       acc[t] += ab * v;
     }
-
-    __syncthreads();
+    __syncthreads(); // barrier
   }
   for (int t=0; t<T; t++) {
       if (ii + t < M) {
