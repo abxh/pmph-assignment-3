@@ -31,20 +31,6 @@ __global__ void mmmNaiveKer(ElTp* A, ElTp* B, ElTp* C, int heightA, int widthB, 
 
 template <class ElTp, int Ty, int Ry, int Tx, int Rx, int Tk>
 __global__ void mmmSymBlkRegInnSeqKer(ElTp* A, ElTp* B, ElTp* C, int heightA, int widthB, int widthA) {
-
-  // Ty = blockDim.y
-  // Tx = blockDim.x
-
-  //    (Ty*Ry x Tk) * (Tk x Tx*Rx)
-  // == (blockDim.y*Ry x Tk) * (Tk x blockDim.x*Rx)
-  // == (blockDim.y*Ry) x (blockDim.x*Rx)
-
-  // css : Ry x Rx (block size y x block size x)
-
-  // heightA = Ty*Ry
-  // widthA = heightB = Tk
-  // widthB = Tx*Rx
-
   const int heightB = widthA;
 
   // remapping (a slice of) A to shared memory
